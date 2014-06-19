@@ -1,5 +1,5 @@
 var map, building;
-
+console.log('uploaded!')
 function onload(){
     map = new OpenLayers.Map('map');
     
@@ -9,7 +9,7 @@ function onload(){
     building = new OpenLayers.Layer.Vector('Building', {
         strategies: [new OpenLayers.Strategy.Fixed()],
         protocol: new OpenLayers.Protocol.HTTP({
-            url: 'http://localhost:8088/building',
+            url: '/building',
             format: new OpenLayers.Format.GeoJSON({
             })
         }),
