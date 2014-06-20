@@ -25,8 +25,6 @@ def building():
     con.enableloadextension(False)
     
     c = con.cursor()
-    features = []
-    errors = []
     bbox = request.params['bbox'].split(',')
 
     try:
@@ -45,7 +43,7 @@ def building():
     except Exception, q:
         c.execute('SELECT AsGeoJSON(Geometry) FROM building')
         features  = c.fetchall()
-        errors = {'Exeption': str(Exception), 'q':str(q), 'box': bbox}
+        # errors = {'Exeption': str(Exception), 'q':str(q), 'box': bbox}
 
     con.close()
 
