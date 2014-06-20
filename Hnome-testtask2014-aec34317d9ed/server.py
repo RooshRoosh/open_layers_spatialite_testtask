@@ -1,5 +1,5 @@
 # This Python file uses the following encoding: utf-8
-from bottle import route, hook, response
+from bottle import route, hook, response, request
 from bottle import template
 import bottle
 
@@ -25,8 +25,16 @@ def building():
     con.enableloadextension(False)
     
     c = con.cursor()
-    c.execute('SELECT AsGeoJSON(Geometry) FROM building')
-    features  = c.fetchall()
+    features = []
+
+    try:
+        bbox = request.forms.get('bbox')
+        features = []
+    except:
+        c.execute('SELECT AsGeoJSON(Geometry) FROM building')
+        features  = c.fetchall()
+
+
     con.close()
 
     res = {'type':'FeatureCollection','features':[]}
