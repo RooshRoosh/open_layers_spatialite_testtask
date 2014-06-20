@@ -9,9 +9,7 @@ function onload(){
 
     building = new OpenLayers.Layer.Vector('Building', {
         strategies: [
-//            new OpenLayers.Strategy.Fixed(),
             new OpenLayers.Strategy.BBOX(),
-//            new OpenLayers.Strategy.Cluster()
         ],
         protocol: new OpenLayers.Protocol.HTTP({
             url: '/building',
