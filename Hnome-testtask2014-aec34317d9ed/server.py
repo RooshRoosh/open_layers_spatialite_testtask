@@ -26,21 +26,34 @@ def building():
     
     c = con.cursor()
     features = []
+    errors = []
+    bbox = request.params['bbox'].split(',')
 
     try:
-        bbox = request.forms.get('bbox')
-        features = []
-    except:
+        c.execute('''
+        SELECT AsGeoJSON(Geometry)
+        FROM building
+        WHERE ROWID IN (SELECT pkid
+              FROM idx_building_Geometry
+              WHERE xmin > %s AND
+                    xmax < %s AND
+                    ymin > %s AND
+                    ymax < %s
+               )
+        ''' % (bbox[0], bbox[1], bbox[2], bbox[3]))
+        features  = c.fetchall()
+    except Exception, q:
         c.execute('SELECT AsGeoJSON(Geometry) FROM building')
         features  = c.fetchall()
-
+        errors = {'Exeption': str(Exception), 'q':str(q), 'box': bbox}
 
     con.close()
 
     res = {'type':'FeatureCollection','features':[]}
     for vals in features:
         res['features'].append({'type':'Feature', 'geometry':json.loads(vals[0])})
-    
+
+    # res = errors
     return json.dumps(res)
 
 app = application = bottle.default_app()
