@@ -35,12 +35,12 @@ def building():
         FROM building
         WHERE ROWID IN (SELECT pkid
               FROM idx_building_Geometry
-              WHERE xmin > %s AND
-                    xmax < %s AND
-                    ymin > %s AND
-                    ymax < %s
+              WHERE xmin >= %s AND
+                    xmax <= %s AND
+                    ymin >= %s AND
+                    ymax <= %s
                )
-        ''' % (bbox[0], bbox[1], bbox[2], bbox[3]))
+        ''' % (bbox[0],bbox[2], bbox[1], bbox[3]))
         features  = c.fetchall()
     except Exception, q:
         c.execute('SELECT AsGeoJSON(Geometry) FROM building')
@@ -57,4 +57,3 @@ def building():
     return json.dumps(res)
 
 app = application = bottle.default_app()
-
