@@ -8,7 +8,11 @@ function onload(){
     map.addLayer(osm);
 
     building = new OpenLayers.Layer.Vector('Building', {
-        strategies: [new OpenLayers.Strategy.Fixed()],
+        strategies: [
+//            new OpenLayers.Strategy.Fixed(),
+            new OpenLayers.Strategy.BBOX(),
+//            new OpenLayers.Strategy.Cluster()
+        ],
         protocol: new OpenLayers.Protocol.HTTP({
             url: '/building',
             format: new OpenLayers.Format.GeoJSON({

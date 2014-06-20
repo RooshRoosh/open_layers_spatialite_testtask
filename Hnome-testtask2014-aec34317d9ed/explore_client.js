@@ -7,7 +7,7 @@
  */
 
 var map
-console.log('uploaded!')
+console.log('uploaded!');
 
 function onload(){
     map = new OpenLayers.Map('map');
