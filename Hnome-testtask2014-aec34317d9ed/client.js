@@ -1,6 +1,9 @@
 
 var map, building;
 console.log('uploaded!')
+
+var bbox = new OpenLayers.Strategy.BBOX();
+
 function onload(){
     map = new OpenLayers.Map('map');
 
@@ -9,7 +12,7 @@ function onload(){
 
     building = new OpenLayers.Layer.Vector('Building', {
         strategies: [
-            new OpenLayers.Strategy.BBOX(),
+            bbox,
         ],
         protocol: new OpenLayers.Protocol.HTTP({
             url: '/building',
@@ -24,21 +27,18 @@ function onload(){
 
 
     map.addLayer(building);
-
-
-
     map.setCenter(
         new OpenLayers.LonLat(60.6069, 56.8370).transform("EPSG:4326", "EPSG:900913"),
         15
     );
-
-    map.events.register('zoomend', map, function(){
-        building.destroyFeatures();
-        console.log('zoomend')}
-    );
+//
+//    map.events.register('zoomend', map, function(){
+//        building.destroyFeatures();
+//        console.log('zoomend')}
+//    );
 //    map.events.register('updatesize', map, function(){console.log('updatesize')});
 //    map.events.register("move", map, function() {console.log("panning");});
-    map.events.register('zoomstart', map, function(){console.log('zoomstart')});
+//    map.events.register('zoomstart', map, function(){console.log('zoomstart')});
 //
 //
 //    building.events.register("refresh", building, function(){console.log('refresh')});
