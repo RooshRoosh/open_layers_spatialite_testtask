@@ -140,9 +140,9 @@
 	        var mapBounds = this.getMapBounds();
 	        if (mapBounds !== null && ((options && options.force) ||
 	                                   this.invalidBounds(mapBounds))) {
-	            this.calculateBounds(mapBounds);
-	            this.resolution = this.layer.map.getResolution();
-	            this.triggerRead(options);
+                this.calculateBounds(mapBounds);
+                this.resolution = this.layer.map.getResolution();
+                this.triggerRead(options);
 	        }
 	    },
 	   
@@ -192,7 +192,9 @@
 	            var ratio = this.resolution / this.layer.map.getResolution();
 	            invalid = (ratio >= this.resFactor || ratio <= (1 / this.resFactor));
 	        }
-	        return invalid;
+//            console.log(invalid);
+            return true;
+//	        return invalid;
 	    },
 	 
 	    /**

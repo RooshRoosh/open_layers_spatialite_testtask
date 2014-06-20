@@ -32,10 +32,10 @@ function onload(){
         15
     );
 //
-//    map.events.register('zoomend', map, function(){
-//        building.destroyFeatures();
-//        console.log('zoomend')}
-//    );
+    map.events.register('zoomend', map, function(){
+        building.destroyFeatures();
+        console.log('zoomend')}
+    );
 //    map.events.register('updatesize', map, function(){console.log('updatesize')});
 //    map.events.register("move", map, function() {console.log("panning");});
 //    map.events.register('zoomstart', map, function(){console.log('zoomstart')});
