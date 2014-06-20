@@ -3,6 +3,7 @@ var map, building;
 console.log('uploaded!')
 
 var bbox = new OpenLayers.Strategy.BBOX();
+bbox.invalidBounds = function(b){return true};
 
 function onload(){
     map = new OpenLayers.Map('map');
