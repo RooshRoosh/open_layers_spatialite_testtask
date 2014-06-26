@@ -15,14 +15,14 @@ function onload(){
 
     // create the layer styleMap by giving the default style a context
     var colors = [
-        '#44aacc', '#44ccaa',
-        '#aacc44', '#aa44cc',
-        '#ccaa44', '#cc44aa'
+        '#44aaff', '#440066',
+        '#aacccc', '#884488',
+        '#88aaee', '#8844aa'
     ]
     var context = {
         getColor: function(feature) {
             return colors[parseInt(Math.random()*5)]
-        }
+        }// можно подумать о раскраске в 4 цвета
     };
     var template = {
         fillColor: "${getColor}", // using context.getColor(feature)

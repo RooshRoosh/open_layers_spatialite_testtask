@@ -65,7 +65,7 @@ def create_clusters():
     cursor = connection.cursor()
     cursor.execute(
         '''
-        CREATE TABLE clusterss (
+        CREATE TABLE clusters (
         PK_UID INTEGER PRIMARY KEY AUTOINCREMENT,
         "Geometry" MULTIPOLYGON);
         '''
@@ -127,7 +127,7 @@ def destroy_clusters():
     cursor = connection.cursor()
     cursor.execute(
         '''
-        DROP TABLE test_buildings;
+        DROP TABLE clusters;
         '''
     )
     cursor.close()

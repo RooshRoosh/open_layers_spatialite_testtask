@@ -32,10 +32,10 @@ class ClusterizationTask(object):
         new_target_list = []
         while self.primitive_count > 0:
             if target_list:
-
+                # print target_list
+                print self.primitive_count
                 for target in target_list:
-                    has_neighbor_primitive = True
-                    has_neighbor_cluster = True
+                    has_neighbor_primitive = has_neighbor_cluster = True
                     # Выполняем запрос:
                         # Дай все кластеры на растоянии distance от target
                     primitive_list = self._get_neighbor_primitive_list(target)
@@ -63,13 +63,14 @@ class ClusterizationTask(object):
                 else:
                     target_list = new_target_list
                     new_target_list = []
+                    break
             else:
                 target_list = self._get_more_targets() # ?
 
 
 
     def _get_first_primitive(self):
-        print self.feed_table, self.start_location
+        # print self.feed_table, self.start_location
         self.cur.execute('''
         SELECT PK_UID, AsGeoJSON(Geometry) from %s
         WHERE Contains(Geometry, GeomFromGeoJSON(':location'))
@@ -90,7 +91,7 @@ class ClusterizationTask(object):
         '''
         Достаём всех ближайших соседей
         '''
-        print primitive
+        # print primitive
         self.cur.execute('''
             SELECT candidate.PK_UID, AsGeoJSON(candidate.Geometry)
                 FROM %s AS target, %s AS candidate
@@ -100,10 +101,11 @@ class ClusterizationTask(object):
             ''' % (self.feed_table, self.feed_table),
             (primitive[0], self.distance)
         )
-
-        for row in self.cur:
-            print 'yield neighbor_primitive_list'
-            yield row
+        object_list = [i for i in self.cur]
+        return object_list
+        # for row in self.cur:
+        #     print 'yield neighbor_primitive_list'
+        #     yield row
 
     def _get_neighbor_cluster_list(self, primitive):
         '''
@@ -113,22 +115,22 @@ class ClusterizationTask(object):
             SELECT candidate.PK_UID, AsGeoJSON(candidate.Geometry)
                 FROM %s AS target, %s AS candidate
                 WHERE target.PK_UID = ? AND
+                candidate.PK_UID <> target.PK_UID AND
                 Distance(target.Geometry, candidate.Geometry) < ?;
             ''' % (self.feed_table, self.cluster_table),
             (primitive[0], self.distance)
         )
-
-        for row in self.cur:
-            print 'yield neighbor_cluster_list'
-            yield row
+        object_list = [i for i in self.cur]
+        return object_list
+        # for row in self.cur:
+        #     print 'yield neighbor_cluster_list'
+            # yield row
 
     def _merge_object_list(self, target, objects_list=[], is_primitive=True):
         '''
         Сливаем мультиполигоны
         '''
         target = list(target)
-        import pprint
-        pprint.pprint(target)
         target[1] = json.loads(target[1])
 
         target[1]['coordinates'] = list(target[1]['coordinates'])
@@ -145,9 +147,8 @@ class ClusterizationTask(object):
         '''
         Добавляем новый кластер
         '''
-        print target
         self.cur.execute('''
-        INSERT INTO clusters VALUES (Null, GeomFromGeoJSON(':geometry'))
+        INSERT INTO clusters (PK_UID,Geometry) VALUES (Null, GeomFromGeoJSON(':geometry'))
         ''', {'geometry':target[1]} )
 
 

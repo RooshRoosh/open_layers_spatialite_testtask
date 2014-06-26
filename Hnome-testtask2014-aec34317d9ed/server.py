@@ -54,20 +54,32 @@ def building():
     # res = errors
     return json.dumps(res)
 
-@route('/clusters', method=['OPTIONS', 'GET'])
+@route('/clusters', method=['GET'])
 def building():
     con = apsw.Connection('data.sqlite')
     con.enableloadextension(True)
     con.loadextension('/usr/lib/x86_64-linux-gnu/libspatialite.so.5')
     con.enableloadextension(False)
     c = con.cursor()
-    c.execute('''
-    SELECT AsGeoJSON(Geometry)
-    FROM test_buildings''')
-    features  = c.fetchall()
     res = {'type':'FeatureCollection','features':[]}
-    for vals in features:
-        res['features'].append({'type':'Feature', 'geometry':json.loads(vals[0])})
-    return json.dumps(res)
+
+    features= []
+    error = {}
+    try:
+        c.execute('''
+        SELECT AsGeoJSON(Geometry)
+        FROM clusters''')
+        features = c.fetchall()
+    except Exception, q:
+        error = {'exeption': str(Exception), 'q':str(q)}
+
+    # error = {'exeption': str(Exception), 'q':str(q), 'features': features}
+    try:
+        for vals in features:
+            res['features'].append({'type':'Feature', 'geometry':json.loads(vals[0])})
+    except Exception, q:
+        error = {'exeption': str(Exception), 'q':str(q), 'f': features}
+
+    return json.dumps(error)
 
 app = application = bottle.default_app()
