@@ -1,6 +1,8 @@
 
-var map, building;
-console.log('uploaded!')
+var map, building,
+    getParams = OpenLayers.Util.getParameters(window.location.href);
+
+getParams['mode'] = getParams['mode'] || 'building';
 
 var bbox = new OpenLayers.Strategy.BBOX();
 bbox.invalidBounds = function(b){return true};
@@ -11,15 +13,35 @@ function onload(){
     var osm = new OpenLayers.Layer.OSM();
     map.addLayer(osm);
 
+    // create the layer styleMap by giving the default style a context
+    var colors = [
+        '#44aacc', '#44ccaa',
+        '#aacc44', '#aa44cc',
+        '#ccaa44', '#cc44aa'
+    ]
+    var context = {
+        getColor: function(feature) {
+            return colors[parseInt(Math.random()*5)]
+        }
+    };
+    var template = {
+        fillColor: "${getColor}", // using context.getColor(feature)
+        fillOpacity: 0.9,
+        strokeColor: "#ffffff",
+        strokeOpacity: 1,
+        strokeWidth: 1
+    };
+
     building = new OpenLayers.Layer.Vector('Building', {
         strategies: [
             bbox,
         ],
         protocol: new OpenLayers.Protocol.HTTP({
-            url: '/building',
+            url: location.origin+'/'+getParams['mode'],
             format: new OpenLayers.Format.GeoJSON({
             })
         }),
+        styleMap: new OpenLayers.Style(template, {context: context})
     });
 
 

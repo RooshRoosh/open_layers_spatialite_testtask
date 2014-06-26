@@ -23,7 +23,7 @@ def building():
     con.enableloadextension(True)
     con.loadextension('/usr/lib/x86_64-linux-gnu/libspatialite.so.5')
     con.enableloadextension(False)
-    
+
     c = con.cursor()
     bbox = request.params['bbox'].split(',')
 
@@ -33,12 +33,12 @@ def building():
         FROM building
         WHERE ROWID IN (SELECT pkid
               FROM idx_building_Geometry
-              WHERE xmin >= %s AND
-                    xmax <= %s AND
-                    ymin >= %s AND
-                    ymax <= %s
+              WHERE xmin >= ? AND
+                    xmax <= ? AND
+                    ymin >= ? AND
+                    ymax <= ?
                )
-        ''' % (bbox[0],bbox[2], bbox[1], bbox[3]))
+        ''', (bbox[0],bbox[2], bbox[1], bbox[3]))
         features  = c.fetchall()
     except Exception, q:
         c.execute('SELECT AsGeoJSON(Geometry) FROM building')
@@ -52,6 +52,22 @@ def building():
         res['features'].append({'type':'Feature', 'geometry':json.loads(vals[0])})
 
     # res = errors
+    return json.dumps(res)
+
+@route('/clusters', method=['OPTIONS', 'GET'])
+def building():
+    con = apsw.Connection('data.sqlite')
+    con.enableloadextension(True)
+    con.loadextension('/usr/lib/x86_64-linux-gnu/libspatialite.so.5')
+    con.enableloadextension(False)
+    c = con.cursor()
+    c.execute('''
+    SELECT AsGeoJSON(Geometry)
+    FROM test_buildings''')
+    features  = c.fetchall()
+    res = {'type':'FeatureCollection','features':[]}
+    for vals in features:
+        res['features'].append({'type':'Feature', 'geometry':json.loads(vals[0])})
     return json.dumps(res)
 
 app = application = bottle.default_app()
