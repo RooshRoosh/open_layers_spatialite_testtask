@@ -5,7 +5,7 @@ var map, building,
 getParams['mode'] = getParams['mode'] || 'building';
 
 var bbox = new OpenLayers.Strategy.BBOX();
-bbox.invalidBounds = function(b){return true};
+//bbox.invalidBounds = function(b){return true};
 
 function onload(){
     map = new OpenLayers.Map('map');
@@ -25,9 +25,9 @@ function onload(){
         }// можно подумать о раскраске в 4 цвета
     };
     var template = {
-        fillColor: '#000',//"${getColor}", // using context.getColor(feature)
+        fillColor: "${getColor}", // using context.getColor(feature)
         fillOpacity: 0.9,
-        strokeColor: "#ffffff",
+        strokeColor: "#aaa",
         strokeOpacity: 1,
         strokeWidth: 1
     };
@@ -51,7 +51,7 @@ function onload(){
         15
     );
     map.events.register('zoomend', map, function(){
-        building.destroyFeatures();
+//        building.destroyFeatures();
     });
 };
 
