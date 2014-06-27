@@ -180,7 +180,7 @@ def prepare_clusters_to_building():
     cursor2 = connection.cursor()
     for item in cursor.execute(
         '''
-        SELECT PK_UID FROM test_buildings
+        SELECT PK_UID FROM building
         '''
     ):
         cursor2.execute(
