@@ -105,6 +105,30 @@ def create_test_buildings():
             ''' % item[0]
         )
 
+def create_clusters_to_building(test=True):
+    connection = apsw.Connection('./../data.sqlite')
+    connection.enableloadextension(True)
+    connection.loadextension('/usr/lib/x86_64-linux-gnu/libspatialite.so.5')
+    connection.enableloadextension(False)
+    cursor = connection.cursor()
+    if test:
+        building = 'test_buildings'
+    else:
+        building = 'building'
+    cursor.execute(
+        '''
+        CREATE TABLE clusters_to_building (
+            PK_UID INTEGER PRIMARY KEY AUTOINCREMENT,
+            cluster_id INTEGER DEFAULT Null,
+            building_id INTEGER,
+            FOREIGN KEY (cluster_id)  REFERENCES clusters(PK_UID),
+            FOREIGN KEY (building_id) REFERENCES %s(PK_UID)
+        );
+        ''' % building
+    )
+    cursor.close()
+    connection.close()
+
 def destroy_test_buildings():
     connection = apsw.Connection('./../data.sqlite')
     connection.enableloadextension(True)
@@ -114,6 +138,20 @@ def destroy_test_buildings():
     cursor.execute(
         '''
         DROP TABLE test_buildings;
+        '''
+    )
+    cursor.close()
+    connection.close()
+
+def destroy_clusters_to_building():
+    connection = apsw.Connection('./../data.sqlite')
+    connection.enableloadextension(True)
+    connection.loadextension('/usr/lib/x86_64-linux-gnu/libspatialite.so.5')
+    connection.enableloadextension(False)
+    cursor = connection.cursor()
+    cursor.execute(
+        '''
+        DROP TABLE clusters_to_building;
         '''
     )
     cursor.close()
@@ -132,6 +170,43 @@ def destroy_clusters():
     )
     cursor.close()
     connection.close()
+
+def prepare_clusters_to_building():
+    connection = apsw.Connection('./../data.sqlite')
+    connection.enableloadextension(True)
+    connection.loadextension('/usr/lib/x86_64-linux-gnu/libspatialite.so.5')
+    connection.enableloadextension(False)
+    cursor = connection.cursor()
+    cursor2 = connection.cursor()
+    for item in cursor.execute(
+        '''
+        SELECT PK_UID FROM building
+        '''
+    ):
+        cursor2.execute(
+            '''
+            INSERT INTO clusters_to_building
+            VALUES (Null, Null, %s)
+            ''' % item[0]
+        )
+
+    cursor.close()
+    connection.close()
+
+def setup():
+    func_list = globals()
+    for f in [
+        'destroy_clusters_to_building',
+        'destroy_clusters',
+        'create_clusters',
+        'create_clusters_to_building',
+        'prepare_clusters_to_building'
+    ]:
+        try:
+            func_list[f]()
+        except Exception, q:
+            print Exception, q
+
 
 
 if __name__ == '__main__':

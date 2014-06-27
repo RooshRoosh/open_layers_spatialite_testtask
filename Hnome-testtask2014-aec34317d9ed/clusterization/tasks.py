@@ -5,6 +5,10 @@ __author__ = 'Ruslan Talipov'
 import apsw
 import json
 
+import logging
+logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
+
+
 class ClusterizationTask(object):
 
     def __init__(self, feed_table, cluster_table, distance, start_location,
@@ -30,6 +34,7 @@ class ClusterizationTask(object):
     def __call__(self, *args, **kwargs):
         target_list = [self._get_first_primitive()]
         new_target_list = []
+
         while self.primitive_count > 0:
             if target_list:
                 # print target_list
@@ -41,6 +46,13 @@ class ClusterizationTask(object):
                     primitive_list = self._get_neighbor_primitive_list(target)
                     # Выполняем запрос:
                         # Дай все примитивы на расстоянии distance от target
+                    if primitive_list:
+                        # Добавляем примитивы к таргету
+                        # Уменьшая счётчик оставшихся примитивов
+                        target = self._merge_object_list(target, primitive_list, True)
+                    else:
+                        has_neighbor_primitive = False
+
                     cluster_list = self._get_neighbor_cluster_list(target)
                     if not cluster_list:
                         # Если пуст добавляем таргет в списк готовых кластеров
@@ -51,21 +63,19 @@ class ClusterizationTask(object):
                         # Объединяем кластеры обновляя target,
                         # не забываем удалять необъединённых участников из базы
                         target = self._merge_object_list(target, cluster_list, False)
-                    if primitive_list:
-                        # Добавляем примитивы к таргету
-                        # Уменьшая счётчик оставшихся примитивов
-                        target = self._merge_object_list(target, primitive_list, True)
-                    else:
-                        has_neighbor_cluster = False
+                        self._delete_cluster(cluster_list)
+                        self._create_cluster(target)
 
-                    if has_neighbor_cluster or has_neighbor_primitive:
+                    if has_neighbor_primitive:
                         new_target_list.append(target)
+                        self._update_cluster(target)
+
                 else:
                     target_list = new_target_list
                     new_target_list = []
-                    break
+
             else:
-                target_list = self._get_more_targets() # ?
+                target_list = self._get_target # ?
 
 
 
@@ -84,7 +94,7 @@ class ClusterizationTask(object):
                 return None
 
 
-    def _get_more_targets(self):
+    def _get_target(self):
         pass
 
     def _get_neighbor_primitive_list(self, primitive):
@@ -130,36 +140,48 @@ class ClusterizationTask(object):
         '''
         Сливаем мультиполигоны
         '''
+        import pprint
         target = list(target)
         target[1] = json.loads(target[1])
+
+        logging.info(target)
 
         target[1]['coordinates'] = list(target[1]['coordinates'])
         for object_ in objects_list:
             object_ = list(object_)
             object_[1] = json.loads(object_[1])
-            target[1]['coordinates'] += object_[1]['coordinates'][0]
+            target[1]['coordinates'] += object_[1]['coordinates']
             if is_primitive:
                 self.primitive_count -= 1
         target[1] = json.dumps(target[1])
+
+        logging.info(target)
+
         return target
 
     def _create_cluster(self, target):
         '''
         Добавляем новый кластер
         '''
+        # print "INSERT INTO clusters (PK_UID,Geometry) VALUES (Null, GeomFromGeoJSON('%s'))" % target[1]
         self.cur.execute('''
-        INSERT INTO clusters (PK_UID,Geometry) VALUES (Null, GeomFromGeoJSON(':geometry'))
-        ''', {'geometry':target[1]} )
+        INSERT INTO clusters (PK_UID,Geometry) VALUES ( Null , GeomFromGeoJSON('%s'))
+        ;'''% target[1]) # % target[1]
 
 
     def _update_cluster(self, target):
-        pass
-
-    def _delete_cluster(self, target):
         self.cur.execute('''
-        DELETE FROM clusters WHERE PK_UID == ?
-        ''', target.id )
-        self.connection.commit()
+        UPDATE clusters SET Geometry = GeomFromGeoJSON('%s') WHERE PK_UID = %s ;
+        ;'''% (target[1],target[0]))
+
+    def _delete_cluster(self, cluster_list):
+
+        if len(cluster_list) > 1:
+            query = '''DELETE FROM clusters WHERE PK_UID IN %s;''' % str(tuple([i[0] for i in cluster_list]))
+        else:
+            query = '''DELETE FROM clusters WHERE PK_UID =  %s;''' % cluster_list[0][0]
+
+        self.cur.execute(query)
 
 if __name__ == '__main__':
     task = ClusterizationTask(

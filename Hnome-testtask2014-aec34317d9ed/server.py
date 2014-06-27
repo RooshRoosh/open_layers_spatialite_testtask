@@ -43,7 +43,6 @@ def building():
     except Exception, q:
         c.execute('SELECT AsGeoJSON(Geometry) FROM building')
         features  = c.fetchall()
-        # errors = {'Exeption': str(Exception), 'q':str(q), 'box': bbox}
 
     con.close()
 
@@ -51,7 +50,6 @@ def building():
     for vals in features:
         res['features'].append({'type':'Feature', 'geometry':json.loads(vals[0])})
 
-    # res = errors
     return json.dumps(res)
 
 @route('/clusters', method=['GET'])
@@ -73,13 +71,12 @@ def building():
     except Exception, q:
         error = {'exeption': str(Exception), 'q':str(q)}
 
-    # error = {'exeption': str(Exception), 'q':str(q), 'features': features}
     try:
         for vals in features:
             res['features'].append({'type':'Feature', 'geometry':json.loads(vals[0])})
     except Exception, q:
         error = {'exeption': str(Exception), 'q':str(q), 'f': features}
 
-    return json.dumps(error)
+    return json.dumps(res)
 
 app = application = bottle.default_app()

@@ -25,7 +25,7 @@ function onload(){
         }// можно подумать о раскраске в 4 цвета
     };
     var template = {
-        fillColor: "${getColor}", // using context.getColor(feature)
+        fillColor: '#000',//"${getColor}", // using context.getColor(feature)
         fillOpacity: 0.9,
         strokeColor: "#ffffff",
         strokeOpacity: 1,
@@ -54,3 +54,4 @@ function onload(){
         building.destroyFeatures();
     });
 };
+
