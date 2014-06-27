@@ -17,7 +17,7 @@ def enable_cors():
 def index():
     return template('index')
 
-@route('/building', method=['OPTIONS', 'GET'])
+@route('/building', method=['GET'])
 def building():
     con = apsw.Connection('data.sqlite')
     con.enableloadextension(True)
@@ -27,8 +27,8 @@ def building():
     c = con.cursor()
     bbox = request.params['bbox'].split(',')
 
-    try:
-        c.execute('''
+    res = {'type':'FeatureCollection','features':[]}
+    for vals in c.execute('''
         SELECT AsGeoJSON(Geometry)
         FROM building
         WHERE ROWID IN (SELECT pkid
@@ -38,16 +38,7 @@ def building():
                     ymin >= ? AND
                     ymax <= ?
                )
-        ''', (bbox[0],bbox[2], bbox[1], bbox[3]))
-        features  = c.fetchall()
-    except Exception, q:
-        c.execute('SELECT AsGeoJSON(Geometry) FROM building')
-        features  = c.fetchall()
-
-    con.close()
-
-    res = {'type':'FeatureCollection','features':[]}
-    for vals in features:
+        ''', (bbox[0],bbox[2], bbox[1], bbox[3])):
         res['features'].append({'type':'Feature', 'geometry':json.loads(vals[0])})
 
     return json.dumps(res)
@@ -61,21 +52,10 @@ def building():
     c = con.cursor()
     res = {'type':'FeatureCollection','features':[]}
 
-    features= []
-    error = {}
-    try:
-        c.execute('''
-        SELECT AsGeoJSON(Geometry)
-        FROM clusters''')
-        features = c.fetchall()
-    except Exception, q:
-        error = {'exeption': str(Exception), 'q':str(q)}
-
-    try:
-        for vals in features:
-            res['features'].append({'type':'Feature', 'geometry':json.loads(vals[0])})
-    except Exception, q:
-        error = {'exeption': str(Exception), 'q':str(q), 'f': features}
+    for vals in c.execute('''
+    SELECT AsGeoJSON(Geometry)
+    FROM clusters'''):
+        res['features'].append({'type':'Feature', 'geometry':json.loads(vals[0])})
 
     return json.dumps(res)
 

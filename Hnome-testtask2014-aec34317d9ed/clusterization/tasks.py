@@ -32,8 +32,6 @@ class ClusterizationTask(object):
 
 
     def __call__(self, *args, **kwargs):
-        target_list = [self._get_first_primitive()]
-        new_target_list = []
 
         # Достаём сиротский примитив Для него ищем все сопряжённые
         target = self._get_target()
@@ -185,10 +183,10 @@ class ClusterizationTask(object):
 
 if __name__ == '__main__':
     task = ClusterizationTask(
-        feed_table = 'buildings',#'test_buildings',
+        feed_table = 'building',#'test_buildings',
         cluster_table = 'clusters',
         distance = 0.0005,
         start_location = (60.607481, 56.834037),
-        primitive_count = 299
+        primitive_count = 34869
     )
     task()

@@ -5,7 +5,7 @@ var map, building,
 getParams['mode'] = getParams['mode'] || 'building';
 
 var bbox = new OpenLayers.Strategy.BBOX();
-//bbox.invalidBounds = function(b){return true};
+bbox.invalidBounds = function(b){return true};
 
 function onload(){
     map = new OpenLayers.Map('map');
@@ -13,11 +13,10 @@ function onload(){
     var osm = new OpenLayers.Layer.OSM();
     map.addLayer(osm);
 
-    // create the layer styleMap by giving the default style a context
     var colors = [
-        '#44aaff', '#440066',
-        '#aacccc', '#884488',
-        '#88aaee', '#8844aa'
+        '#ffaaff', '#aaaaff',
+        '#aaffff', '#aaffaa',
+        '#ffffaa', '#ffaaaa'
     ]
     var context = {
         getColor: function(feature) {
@@ -27,7 +26,7 @@ function onload(){
     var template = {
         fillColor: "${getColor}", // using context.getColor(feature)
         fillOpacity: 0.9,
-        strokeColor: "#aaa",
+        strokeColor: "#c00",
         strokeOpacity: 1,
         strokeWidth: 1
     };
@@ -44,14 +43,10 @@ function onload(){
         styleMap: new OpenLayers.Style(template, {context: context})
     });
 
-
     map.addLayer(building);
     map.setCenter(
         new OpenLayers.LonLat(60.6069, 56.8370).transform("EPSG:4326", "EPSG:900913"),
         15
     );
-    map.events.register('zoomend', map, function(){
-//        building.destroyFeatures();
-    });
 };
 
