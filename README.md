@@ -1,4 +1,4 @@
 open_layers_spatialite_testtask
 ===============================
 
-Тестовое задание
+Работаем с OpenLayers и Spatialite
